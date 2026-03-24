@@ -1,6 +1,7 @@
 import { connectDB } from "@/config/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
+import Wallet from "@/models/Wallet";
 
 export async function POST(req) {
 
@@ -14,6 +15,11 @@ export async function POST(req) {
     name,
     email,
     password: hashedPassword
+  });
+
+  // ✅ Create wallet automatically
+  await Wallet.create({
+    userId: user._id
   });
 
   return Response.json({
