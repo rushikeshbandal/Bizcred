@@ -2,31 +2,37 @@ import { connectDB } from "@/config/db";
 import User from "@/models/User";
 import { verifyAdmin } from "@/middleware/authMiddleware";
 
-export async function PUT(req) {
+export async function POST(req) {
   try {
     await connectDB();
+
     verifyAdmin(req);
 
-    const { userId, status } = await req.json();
+    const { userId, pan, aadhaar } = await req.json();
 
-    if (!userId || !status) {
+    if (!pan || !aadhaar) {
       return Response.json({
         success: false,
-        message: "UserId and status required",
+        message: "PAN and Aadhaar required"
       });
     }
 
-    await User.findByIdAndUpdate(userId, { status });
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { kyc: { pan, aadhaar } },
+      { new: true }
+    );
 
     return Response.json({
       success: true,
-      message: "User status updated successfully",
+      message: "KYC updated",
+      user
     });
 
   } catch (error) {
     return Response.json({
       success: false,
-      message: "Error updating status",
+      message: "Error updating KYC"
     });
   }
 }

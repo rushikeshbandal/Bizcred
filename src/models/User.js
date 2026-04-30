@@ -13,7 +13,29 @@ const UserSchema = new mongoose.Schema({
   password: {
     type: String,
     required: true
+  },
+
+  role: {
+    type: String,
+    enum: ["admin", "user"],
+    default: "user"
+  },
+
+   status: {
+    type: String,
+    enum: ["active", "blocked", "suspended"],
+    default: "active",
+  },
+
+  kyc: {
+    pan: {
+      type: String
+    },
+    aadhaar: {
+      type: String
+    }
   }
-});
+
+}, { timestamps: true });
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);

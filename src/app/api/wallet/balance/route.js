@@ -1,16 +1,17 @@
 import { connectDB } from "@/config/db";
 import Wallet from "@/models/Wallet";
-import { verifyToken } from "@/middleware/authMiddleware";
+import { verifyAdmin } from "@/middleware/authMiddleware";
 
-export async function GET(req) {
-
+export async function POST(req) {
   await connectDB();
 
-  const user = verifyToken(req);
+  verifyAdmin(req);
 
-  const wallet = await Wallet.findOne({ userId: user.userId });
+  const { userId } = await req.json();
+
+  const wallet = await Wallet.findOne({ userId });
 
   return Response.json({
-    balance: wallet.balance
+    balance: wallet?.balance || 0
   });
 }

@@ -1,32 +1,36 @@
 import { connectDB } from "@/config/db";
 import User from "@/models/User";
+import Wallet from "@/models/Wallet";
 import { verifyAdmin } from "@/middleware/authMiddleware";
 
-export async function PUT(req) {
+export async function DELETE(req) {
   try {
     await connectDB();
+
     verifyAdmin(req);
 
-    const { userId, status } = await req.json();
+    const { userId } = await req.json();
 
-    if (!userId || !status) {
+    if (!userId) {
       return Response.json({
         success: false,
-        message: "UserId and status required",
+        message: "UserId is required"
       });
     }
 
-    await User.findByIdAndUpdate(userId, { status });
+    // 🔥 delete user + wallet
+    await User.findByIdAndDelete(userId);
+    await Wallet.findOneAndDelete({ userId });
 
     return Response.json({
       success: true,
-      message: "User status updated successfully",
+      message: "User deleted successfully"
     });
 
   } catch (error) {
     return Response.json({
       success: false,
-      message: "Error updating status",
+      message: "Error deleting user"
     });
   }
 }

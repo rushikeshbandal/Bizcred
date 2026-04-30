@@ -1,34 +1,32 @@
-import { connectDB } from "@/config/db";
-import User from "@/models/User";
-import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export async function POST(req) {
-
-  await connectDB();
-
   const { email, password } = await req.json();
 
-  const user = await User.findOne({ email });
+  // 🔐 HARDCODED ADMIN
+  const ADMIN_EMAIL = "admin@gmail.com";
+  const ADMIN_PASSWORD = "123456";
 
-  if (!user) {
-    return Response.json({ message: "User not found" });
+  if (email !== ADMIN_EMAIL || password !== ADMIN_PASSWORD) {
+    return Response.json({
+      success: false,
+      message: "Invalid admin credentials"
+    });
   }
 
-  const isMatch = await bcrypt.compare(password, user.password);
-
-  if (!isMatch) {
-    return Response.json({ message: "Invalid password" });
-  }
-
+  // ✅ generate token
   const token = jwt.sign(
-    { userId: user._id },
+    {
+      userId: "admin",
+      role: "admin"
+    },
     process.env.JWT_SECRET,
     { expiresIn: "1d" }
   );
 
   return Response.json({
-    message: "Login successful",
+    success: true,
+    message: "Admin login successful",
     token
   });
 }
