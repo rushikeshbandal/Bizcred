@@ -5,7 +5,6 @@ import { verifyAdmin } from "@/middleware/authMiddleware";
 export async function POST(req) {
   try {
     await connectDB();
-
     verifyAdmin(req);
 
     const { userId, pan, aadhaar } = await req.json();
@@ -19,13 +18,19 @@ export async function POST(req) {
 
     const user = await User.findByIdAndUpdate(
       userId,
-      { kyc: { pan, aadhaar } },
+      {
+        kyc: {
+          pan,
+          aadhaar,
+          status: "pending"   // ✅ ALWAYS PENDING FIRST
+        }
+      },
       { new: true }
     );
 
     return Response.json({
       success: true,
-      message: "KYC updated",
+      message: "KYC submitted (Pending)",
       user
     });
 

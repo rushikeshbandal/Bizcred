@@ -52,12 +52,18 @@ export async function POST(req) {
     wallet.balance += amount;
     await wallet.save();
 
-    // ✅ SAVE TRANSACTION
+    // // ✅ SAVE TRANSACTION
+    // await Transaction.create({
+    //   userId,
+    //   type: "credit",
+    //   amount,
+    // });
+
     await Transaction.create({
-      userId,
-      type: "credit",
-      amount,
-    });
+  user: userId,   //  FIXED
+  type: "credit",
+  amount,
+});
 
     return Response.json({
       success: true,

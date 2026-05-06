@@ -8,17 +8,8 @@ export async function GET(req) {
 
     verifyAdmin(req);
 
-    const { searchParams } = new URL(req.url);
-    const userId = searchParams.get("userId");
-
-    if (!userId) {
-      return Response.json({
-        success: false,
-        message: "UserId required",
-      });
-    }
-
-    const transactions = await Transaction.find({ user: userId })
+    const transactions = await Transaction.find()
+      .populate("user", "name email")
       .sort({ createdAt: -1 });
 
     return Response.json({

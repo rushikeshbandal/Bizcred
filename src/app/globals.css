@@ -1,14 +1,18 @@
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #f4f6fb;
+  --foreground: #111111;
 }
 
+/* ❌ REMOVE DARK MODE AUTO SWITCH */
+/* Commented to avoid faint text issue */
+/*
 @media (prefers-color-scheme: dark) {
   :root {
     --background: #0a0a0a;
     --foreground: #ededed;
   }
 }
+*/
 
 html,
 body {
@@ -24,10 +28,12 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* 🔥 FORCE TEXT COLOR EVERYWHERE */
 * {
   box-sizing: border-box;
   padding: 0;
   margin: 0;
+  color: #111;   /* ✅ FIX FAINT TEXT */
 }
 
 a {
@@ -35,8 +41,11 @@ a {
   text-decoration: none;
 }
 
+/* ❌ REMOVE THIS ALSO */
+/*
 @media (prefers-color-scheme: dark) {
   html {
     color-scheme: dark;
   }
 }
+*/

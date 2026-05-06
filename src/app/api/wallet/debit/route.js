@@ -62,7 +62,7 @@ export async function POST(req) {
 
     // ✅ SAVE TRANSACTION
     await Transaction.create({
-      userId,
+    user: userId,
       type: "debit",
       amount,
     });

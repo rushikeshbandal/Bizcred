@@ -9,7 +9,7 @@ export default function Navbar() {
   const router = useRouter();
   const pathname = usePathname();
   const dropdownRef = useRef();
-  const timeoutRef = useRef(); // 🆕 delay control
+  const timeoutRef = useRef();
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -27,7 +27,7 @@ export default function Navbar() {
     }
   }, []);
 
-  // ✅ CLOSE when click outside
+  // CLOSE ON OUTSIDE CLICK
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -46,11 +46,10 @@ export default function Navbar() {
     router.push("/login");
   };
 
-  // 🆕 HANDLE SAFE CLOSE WITH DELAY
   const handleMouseLeave = () => {
     timeoutRef.current = setTimeout(() => {
       setOpen(false);
-    }, 200); // delay prevents instant close
+    }, 200);
   };
 
   const handleMouseEnter = () => {
@@ -59,9 +58,14 @@ export default function Navbar() {
 
   return (
     <div style={nav}>
-      <h2 onClick={() => router.push("/dashboard")} style={logo}>
-        💳 BizCred
-      </h2>
+      
+      {/* ✅ LOGO ADDED */}
+      <img
+        src="/BizCred-logo.png"
+        alt="BizCred Logo"
+        style={logoImg}
+        onClick={() => router.push("/dashboard")}
+      />
 
       <div
         ref={dropdownRef}
@@ -107,7 +111,7 @@ export default function Navbar() {
 }
 
 //
-// 🎨 STYLES (UNCHANGED LOOK, BETTER UX)
+// 🎨 STYLES
 //
 
 const nav = {
@@ -124,9 +128,11 @@ const nav = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
 };
 
-const logo = {
+// ✅ NEW LOGO STYLE
+const logoImg = {
+  height: "40px",
   cursor: "pointer",
-  fontWeight: "bold",
+  objectFit: "contain",
 };
 
 const userBox = {

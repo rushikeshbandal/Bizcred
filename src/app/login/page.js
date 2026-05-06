@@ -51,19 +51,24 @@ export default function LoginPage() {
   return (
     <div style={container}>
       
-      {/* LEFT SIDE (Branding) */}
+      {/* LEFT SIDE */}
       <div style={left}>
-        <h1 style={logo}>💳 BizCred</h1>
+        <img 
+          src="/BizCred-logo.png" 
+          alt="BizCred Logo" 
+          style={logoImg}
+        />
+
         <p style={tagline}>
           Secure • Fast • Smart <br />
           Fintech Admin Panel
         </p>
       </div>
 
-      {/* RIGHT SIDE (LOGIN CARD) */}
+      {/* RIGHT SIDE */}
       <div style={right}>
         <div style={card}>
-          <h2 style={title}>🔐 Welcome Back</h2>
+          <h2 style={title}>Welcome Back</h2>
 
           <input
             type="email"
@@ -94,33 +99,34 @@ export default function LoginPage() {
 }
 
 //
-// 🎨 STYLES (ADVANCED)
+// 🎨 STYLES (WHITE PROFESSIONAL UI)
 //
 
 const container = {
   height: "100vh",
   display: "flex",
-  background: "linear-gradient(135deg,#667eea,#764ba2)",
+  background: "#ffffff", // ✅ WHITE BACKGROUND
 };
 
 const left = {
   flex: 1,
-  color: "#fff",
+  background: "#f5f7ff", // light soft background
+  color: "#333",
   display: "flex",
   flexDirection: "column",
   justifyContent: "center",
-  paddingLeft: "80px",
+  alignItems: "center",
 };
 
-const logo = {
-  fontSize: "40px",
-  fontWeight: "bold",
+const logoImg = {
+  width: "220px",
+  marginBottom: "20px",
 };
 
 const tagline = {
-  marginTop: "20px",
   fontSize: "18px",
-  opacity: 0.9,
+  color: "#555",
+  textAlign: "center",
 };
 
 const right = {
@@ -128,21 +134,21 @@ const right = {
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
+  background: "#ffffff",
 };
 
 const card = {
   width: "360px",
   padding: "35px",
   borderRadius: "16px",
-  background: "rgba(255,255,255,0.15)",
-  backdropFilter: "blur(12px)",
-  boxShadow: "0 8px 32px rgba(0,0,0,0.2)",
-  color: "#fff",
+  background: "#fff",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.1)",
 };
 
 const title = {
   textAlign: "center",
   marginBottom: "20px",
+  color: "#333",
 };
 
 const input = {
@@ -150,17 +156,16 @@ const input = {
   padding: "12px",
   marginBottom: "12px",
   borderRadius: "8px",
-  border: "none",
+  border: "1px solid #ddd",
   outline: "none",
-  background: "rgba(255,255,255,0.2)",
-  color: "#fff",
+  color: "#333",
 };
 
 const button = {
   width: "100%",
   padding: "12px",
-  background: "#fff",
-  color: "#667eea",
+  background: "linear-gradient(90deg,#667eea,#764ba2)",
+  color: "#fff",
   border: "none",
   borderRadius: "8px",
   cursor: "pointer",

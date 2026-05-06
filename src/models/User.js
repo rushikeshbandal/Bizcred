@@ -1,19 +1,9 @@
 import mongoose from "mongoose";
 
 const UserSchema = new mongoose.Schema({
-  name: {
-    type: String,
-    required: true
-  },
-  email: {
-    type: String,
-    required: true,
-    unique: true
-  },
-  password: {
-    type: String,
-    required: true
-  },
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
 
   role: {
     type: String,
@@ -21,18 +11,20 @@ const UserSchema = new mongoose.Schema({
     default: "user"
   },
 
-   status: {
+  status: {
     type: String,
     enum: ["active", "blocked", "suspended"],
     default: "active",
   },
 
+  // ✅ UPDATED KYC
   kyc: {
-    pan: {
-      type: String
-    },
-    aadhaar: {
-      type: String
+    pan: String,
+    aadhaar: String,
+    status: {
+      type: String,
+      enum: ["pending", "approved", "rejected"],
+      default: "pending"
     }
   }
 

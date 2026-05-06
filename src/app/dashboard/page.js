@@ -7,11 +7,13 @@ import { Doughnut, Bar } from "react-chartjs-2";
 export default function Dashboard() {
   const [users, setUsers] = useState([]);
   const [totalBalance, setTotalBalance] = useState(0);
+  const [transactionsCount, setTransactionsCount] = useState(0);
 
   const [userGrowth, setUserGrowth] = useState(0);
   const [balanceGrowth, setBalanceGrowth] = useState(0);
 
-  // 🆕 STATUS STATS
+  const [monthlyUsers, setMonthlyUsers] = useState(new Array(12).fill(0));
+
   const [stats, setStats] = useState({
     newUsers: 0,
     activeUsers: 0,
@@ -28,9 +30,7 @@ export default function Dashboard() {
       const token = localStorage.getItem("token");
 
       const res = await fetch("http://localhost:3000/api/users/list", {
-        headers: {
-          Authorization: "Bearer " + token,
-        },
+        headers: { Authorization: "Bearer " + token },
       });
 
       const data = await res.json();
@@ -39,13 +39,8 @@ export default function Dashboard() {
       setUsers(usersData);
 
       let total = 0;
-      usersData.forEach((u) => {
-        total += u.wallet?.balance || 0;
-      });
+      let monthly = new Array(12).fill(0);
 
-      setTotalBalance(total);
-
-      // 📊 MONTHLY + STATUS LOGIC
       const now = new Date();
       const currentMonth = now.getMonth();
       const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
@@ -63,7 +58,10 @@ export default function Dashboard() {
       usersData.forEach((u) => {
         const created = new Date(u.createdAt);
 
-        // Monthly
+        total += u.wallet?.balance || 0;
+
+        monthly[created.getMonth()]++;
+
         if (created.getMonth() === currentMonth) {
           currentUsers++;
           currentBalance += u.wallet?.balance || 0;
@@ -73,11 +71,13 @@ export default function Dashboard() {
           lastBalance += u.wallet?.balance || 0;
         }
 
-        // Status
         if (u.status === "active") activeUsers++;
         else if (u.status === "blocked") blockedUsers++;
         else if (u.status === "suspended") suspendedUsers++;
       });
+
+      setTotalBalance(total);
+      setMonthlyUsers(monthly);
 
       const userGrowthPercent =
         lastUsers === 0 ? 100 : ((currentUsers - lastUsers) / lastUsers) * 100;
@@ -97,6 +97,14 @@ export default function Dashboard() {
         suspendedUsers,
       });
 
+      // TRANSACTIONS COUNT
+      const txRes = await fetch("http://localhost:3000/api/transactions/all", {
+        headers: { Authorization: "Bearer " + token },
+      });
+
+      const txData = await txRes.json();
+      setTransactionsCount(txData.transactions?.length || 0);
+
     } catch (error) {
       console.error("Dashboard Error:", error);
     }
@@ -113,11 +121,14 @@ export default function Dashboard() {
   };
 
   const barData = {
-    labels: users.map((u) => u.name),
+    labels: [
+      "Jan","Feb","Mar","Apr","May","Jun",
+      "Jul","Aug","Sep","Oct","Nov","Dec"
+    ],
     datasets: [
       {
-        label: "Balance",
-        data: users.map((u) => u.wallet?.balance || 0),
+        label: "Users Joined",
+        data: monthlyUsers,
         backgroundColor: "#667eea",
       },
     ],
@@ -125,28 +136,22 @@ export default function Dashboard() {
 
   return (
     <div style={container}>
-      
       {/* SIDEBAR */}
       <div style={sidebar}>
         <h2>💳 BizCred</h2>
 
         <p style={link} onClick={() => location.href="/dashboard"}>📊 Dashboard</p>
         <p style={link} onClick={() => location.href="/users"}>👥 Users</p>
+        <p style={link} onClick={() => location.href="/transactions"}>📜 Transactions</p>
+        <p style={link} onClick={() => location.href="/kyc"}>🧾 KYC</p>
+        <p style={link} onClick={() => location.href="/wallet"}>💰 Wallet</p>
         <p style={link} onClick={() => location.href="/add-user"}>➕ Add User</p>
-
-        {/* 🆕 EXTRA MENU */}
-        <hr style={{ opacity: 0.3 }} />
-        <p style={link}>📜 Transactions</p>
-        <p style={link}>🧾 KYC</p>
-        <p style={link}>🔒 Wallet Control</p>
-        <p style={link}>⚙️ Settings</p>
       </div>
 
       {/* MAIN */}
       <div style={main}>
         <h1 style={heading}>📊 Admin Dashboard</h1>
 
-        {/* CARDS */}
         <div style={cardGrid}>
           <div style={{ ...card, background: gradient1 }}>
             <h4>Total Users</h4>
@@ -160,7 +165,7 @@ export default function Dashboard() {
 
           <div style={{ ...card, background: gradient3 }}>
             <h4>Transactions</h4>
-            <h2>{users.length * 5}</h2>
+            <h2>{transactionsCount}</h2>
           </div>
 
           <div style={{ ...card, background: gradient4 }}>
@@ -169,45 +174,42 @@ export default function Dashboard() {
           </div>
         </div>
 
-        {/* 📈 MONTHLY GROWTH */}
         <div style={growthBox}>
           <h2>📈 Monthly Growth</h2>
 
           <div style={growthGrid}>
             <div style={growthCard}>
               <h4>👤 User Growth</h4>
-              <h2 style={{ color: "green" }}>+{userGrowth}%</h2>
+              <h2>+{userGrowth}%</h2>
             </div>
 
             <div style={growthCard}>
               <h4>💰 Balance Growth</h4>
-              <h2 style={{ color: "green" }}>+{balanceGrowth}%</h2>
+              <h2>+{balanceGrowth}%</h2>
             </div>
 
-            {/* 🆕 NEW */}
             <div style={growthCard}>
               <h4>🆕 New Users</h4>
               <h2>{stats.newUsers}</h2>
             </div>
 
             <div style={growthCard}>
-              <h4>✅ Active Users</h4>
+              <h4>✅ Active</h4>
               <h2>{stats.activeUsers}</h2>
             </div>
 
             <div style={growthCard}>
-              <h4>⛔ Blocked Users</h4>
+              <h4>⛔ Blocked</h4>
               <h2>{stats.blockedUsers}</h2>
             </div>
 
             <div style={growthCard}>
-              <h4>⚠️ Suspended Users</h4>
+              <h4>⚠️ Suspended</h4>
               <h2>{stats.suspendedUsers}</h2>
             </div>
           </div>
         </div>
 
-        {/* CHARTS */}
         <div style={chartGrid}>
           <div style={chartCard}>
             <h3>User vs Balance</h3>
@@ -215,7 +217,7 @@ export default function Dashboard() {
           </div>
 
           <div style={chartCard}>
-            <h3>User Balances</h3>
+            <h3>Monthly User Growth</h3>
             <Bar data={barData} />
           </div>
         </div>
@@ -225,7 +227,7 @@ export default function Dashboard() {
 }
 
 //
-// 🎨 STYLES
+// 🎨 STYLES (FIXED ERROR HERE)
 //
 
 const container = {
@@ -268,7 +270,6 @@ const card = {
   color: "#fff",
   padding: "20px",
   borderRadius: "15px",
-  boxShadow: "0 10px 25px rgba(0,0,0,0.1)",
 };
 
 const gradient1 = "linear-gradient(135deg,#667eea,#764ba2)";
@@ -306,5 +307,4 @@ const chartCard = {
   background: "#fff",
   padding: "20px",
   borderRadius: "15px",
-  boxShadow: "0 5px 15px rgba(0,0,0,0.1)",
 };
