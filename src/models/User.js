@@ -18,15 +18,20 @@ const UserSchema = new mongoose.Schema({
   },
 
   // ✅ UPDATED KYC
-  kyc: {
-    pan: String,
-    aadhaar: String,
-    status: {
-      type: String,
-      enum: ["pending", "approved", "rejected"],
-      default: "pending"
-    }
+kyc: {
+  pan: String,
+  aadhaar: String,
+
+  panName: String,
+  panCategory: String,
+  panStatus: String,
+
+  status: {
+    type: String,
+    enum: ["not_submitted", "pending", "approved", "rejected"],
+    default: "not_submitted"
   }
+}
 
 }, { timestamps: true });
 

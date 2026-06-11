@@ -3,6 +3,7 @@ import Wallet from "@/models/Wallet";
 import Transaction from "@/models/Transaction";
 import User from "@/models/User"; // ✅ REQUIRED
 import { verifyAdmin } from "@/middleware/authMiddleware";
+import { sendEmail } from "@/utils/sendEmail";
 
 export async function POST(req) {
   try {
@@ -62,10 +63,31 @@ export async function POST(req) {
 
     // ✅ SAVE TRANSACTION
     await Transaction.create({
-    user: userId,
+      user: userId,
       type: "debit",
       amount,
     });
+
+    // ✅ SEND EMAIL
+    await sendEmail(
+      user.email,
+      "Wallet Debit Alert",
+      `
+      <h2>Wallet Debited Successfully</h2>
+
+      <p>Hello ${user.name || "User"},</p>
+
+      <p>An amount has been debited from your wallet.</p>
+
+      <p><strong>Amount:</strong> ₹${amount}</p>
+
+      <p><strong>Remaining Balance:</strong> ₹${wallet.balance}</p>
+
+      <p>If you did not expect this transaction, please contact support.</p>
+
+      <p>Thank you for using BizCred.</p>
+      `
+    );
 
     return Response.json({
       success: true,
@@ -75,6 +97,7 @@ export async function POST(req) {
 
   } catch (error) {
     console.error(error);
+
     return Response.json({
       success: false,
       message: "Server error",

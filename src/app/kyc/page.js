@@ -45,8 +45,12 @@ export default function KYCPage() {
             <h3>{u.name}</h3>
             <p>{u.email}</p>
 
-            <p><b>PAN:</b> {u.kyc?.pan || "Not submitted"}</p>
-            <p><b>Aadhaar:</b> {u.kyc?.aadhaar || "Not submitted"}</p>
+<p><b>PAN:</b> {u.kyc?.pan || "-"}</p>
+<p><b>Aadhaar:</b> {u.kyc?.aadhaar || "-"}</p>
+
+<p><b>PAN Name:</b> {u.kyc?.panName || "-"}</p>
+<p><b>PAN Category:</b> {u.kyc?.panCategory || "-"}</p>
+<p><b>PAN Status:</b> {u.kyc?.panStatus || "-"}</p>
 
             <p style={statusStyle(u.kyc?.status)}>
               Status: {u.kyc?.status || "pending"}

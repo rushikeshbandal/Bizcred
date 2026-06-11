@@ -4,22 +4,34 @@ import Wallet from "@/models/Wallet";
 import { verifyAdmin } from "@/middleware/authMiddleware";
 
 export async function GET(req) {
+
   try {
+
     await connectDB();
 
+    // ✅ VERIFY ADMIN TOKEN
     verifyAdmin(req);
 
     const users = await User.find().lean();
 
-    //  attach wallet balance
     const usersWithWallet = await Promise.all(
+
       users.map(async (u) => {
-        const wallet = await Wallet.findOne({ userId: u._id });
+
+        const wallet =
+          await Wallet.findOne({
+            userId: u._id
+          });
+
         return {
           ...u,
-          wallet: wallet || { balance: 0 }
+          wallet: wallet || {
+            balance: 0
+          }
         };
+
       })
+
     );
 
     return Response.json({
@@ -28,9 +40,12 @@ export async function GET(req) {
     });
 
   } catch (error) {
+
     return Response.json({
       success: false,
-      message: "Unauthorized"
+      message: error.message
     });
+
   }
+
 }

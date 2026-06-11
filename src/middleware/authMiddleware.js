@@ -1,19 +1,35 @@
 import jwt from "jsonwebtoken";
 
-export function verifyAdmin(req) {
-  const authHeader = req.headers.get("authorization");
+export const verifyAdmin = (req) => {
 
-  if (!authHeader) {
-    throw new Error("No token");
-  }
+  try {
 
-  const token = authHeader.split(" ")[1];
+    const authHeader =
+      req.headers.get("authorization");
 
-  const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    if (!authHeader) {
+      throw new Error("No Token");
+    }
 
-  if (decoded.role !== "admin") {
+    const token =
+      authHeader.split(" ")[1];
+
+    const decoded = jwt.verify(
+      token,
+      process.env.JWT_SECRET
+    );
+
+    // ✅ CHECK ADMIN
+    if (decoded.role !== "admin") {
+      throw new Error("Unauthorized");
+    }
+
+    return decoded;
+
+  } catch (error) {
+
     throw new Error("Unauthorized");
+
   }
 
-  return decoded;
-}
+};

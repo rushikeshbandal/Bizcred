@@ -4,28 +4,18 @@ import { useRouter, usePathname } from "next/navigation";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
-  const [user, setUser] = useState(null);
+
+  // ✅ STATIC ADMIN USER
+  const [user, setUser] = useState({
+    name: "Admin",
+    email: "admin@bizcred.com",
+  });
 
   const router = useRouter();
   const pathname = usePathname();
+
   const dropdownRef = useRef();
   const timeoutRef = useRef();
-
-  useEffect(() => {
-    const token = localStorage.getItem("token");
-
-    if (token) {
-      fetch("http://localhost:3000/api/users/me", {
-        headers: {
-          Authorization: "Bearer " + token,
-        },
-      })
-        .then(res => res.json())
-        .then(data => {
-          if (data.user) setUser(data.user);
-        });
-    }
-  }, []);
 
   // CLOSE ON OUTSIDE CLICK
   useEffect(() => {
@@ -36,9 +26,13 @@ export default function Navbar() {
     };
 
     document.addEventListener("mousedown", handleClick);
-    return () => document.removeEventListener("mousedown", handleClick);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClick);
+    };
   }, []);
 
+  // HIDE NAVBAR ON LOGIN PAGE
   if (pathname === "/login") return null;
 
   const logout = () => {
@@ -59,7 +53,7 @@ export default function Navbar() {
   return (
     <div style={nav}>
       
-      {/* ✅ LOGO ADDED */}
+      {/* ✅ LOGO */}
       <img
         src="/BizCred-logo.png"
         alt="BizCred Logo"
@@ -67,6 +61,7 @@ export default function Navbar() {
         onClick={() => router.push("/dashboard")}
       />
 
+      {/* USER SECTION */}
       <div
         ref={dropdownRef}
         style={userBox}
@@ -81,28 +76,63 @@ export default function Navbar() {
         {/* DROPDOWN */}
         {open && (
           <div style={dropdown}>
-            <p style={name}>{user?.name || "Admin"}</p>
+            
+            <p style={name}>{user?.name}</p>
             <p style={email}>{user?.email}</p>
 
             <div style={divider}></div>
 
-            <p onClick={() => router.push("/dashboard")} style={item}>
+            <p
+              onClick={() => router.push("/dashboard")}
+              style={item}
+            >
               📊 Dashboard
             </p>
 
-            <p onClick={() => router.push("/users")} style={item}>
+            <p
+              onClick={() => router.push("/users")}
+              style={item}
+            >
               👥 Users
             </p>
 
-            <p onClick={() => router.push("/add-user")} style={item}>
+            <p
+              onClick={() => router.push("/transactions")}
+              style={item}
+            >
+              📜 Transactions
+            </p>
+
+            <p
+              onClick={() => router.push("/wallet")}
+              style={item}
+            >
+              💰 Wallet
+            </p>
+
+            <p
+              onClick={() => router.push("/kyc")}
+              style={item}
+            >
+              🧾 KYC
+            </p>
+
+            <p
+              onClick={() => router.push("/add-user")}
+              style={item}
+            >
               ➕ Add User
             </p>
 
             <div style={divider}></div>
 
-            <p onClick={logout} style={{ ...item, color: "red" }}>
+            <p
+              onClick={logout}
+              style={{ ...item, color: "red" }}
+            >
               🚪 Logout
             </p>
+
           </div>
         )}
       </div>
@@ -128,9 +158,8 @@ const nav = {
   boxShadow: "0 4px 12px rgba(0,0,0,0.2)",
 };
 
-// ✅ NEW LOGO STYLE
 const logoImg = {
-  height: "40px",
+  height: "42px",
   cursor: "pointer",
   objectFit: "contain",
 };
@@ -157,7 +186,7 @@ const dropdown = {
   position: "absolute",
   right: 0,
   top: 55,
-  width: 200,
+  width: 220,
   background: "#fff",
   color: "#000",
   borderRadius: "12px",
@@ -175,11 +204,13 @@ const email = {
   textAlign: "center",
   fontSize: "12px",
   color: "gray",
+  marginBottom: "5px",
 };
 
 const item = {
-  padding: "10px 15px",
+  padding: "12px 16px",
   cursor: "pointer",
+  transition: "0.2s",
 };
 
 const divider = {
