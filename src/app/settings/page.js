@@ -69,56 +69,30 @@ export default function Settings() {
       <div style={card}>
         <h2>General Settings</h2>
 
-        <input
-          placeholder="Company Name"
-          value={
-            settings.general.companyName
-          }
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              general: {
-                ...settings.general,
-                companyName:
-                  e.target.value,
-              },
-            })
-          }
-        />
+       <div>
+         <label>Company Name</label>
+           <input
+               style={input}
+               placeholder="Company Name"
+           />
+        </div>
+         <div>
+         <label>Support Email</label>
+           <input
+               style={input}
+               placeholder="Support Email"
+           />
+        </div>
 
-        <input
-          placeholder="Support Email"
-          value={
-            settings.general.supportEmail
-          }
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              general: {
-                ...settings.general,
-                supportEmail:
-                  e.target.value,
-              },
-            })
-          }
-        />
+       
 
-        <input
-          placeholder="Support Phone"
-          value={
-            settings.general.supportPhone
-          }
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              general: {
-                ...settings.general,
-                supportPhone:
-                  e.target.value,
-              },
-            })
-          }
-        />
+        <div>
+         <label>Support Phone</label>
+           <input
+               style={input}
+               placeholder="Support Phone"
+           />
+        </div>
       </div>
 
       <div style={card}>
@@ -158,11 +132,11 @@ export default function Settings() {
 
 const card = {
   background: "#fff",
-  padding: "20px",
-  marginBottom: "20px",
-  borderRadius: "15px",
+  padding: "25px",
+  borderRadius: "20px",
+  marginBottom: "25px",
+  boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
 };
-
 const btn = {
   background: "#667eea",
   color: "#fff",
@@ -170,4 +144,29 @@ const btn = {
   border: "none",
   borderRadius: "10px",
   cursor: "pointer",
+};
+const input = {
+  width: "100%",
+  padding: "12px 15px",
+  border: "1px solid #d1d5db",
+  borderRadius: "10px",
+  fontSize: "14px",
+  outline: "none",
+  marginTop: "8px",
+};
+
+const sectionTitle = {
+  marginBottom: "20px",
+  color: "#111827",
+};
+
+const row = {
+  display: "grid",
+  gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))",
+  gap: "20px",
+};
+
+const h1 = {
+  marginTop :"100px" ,
+  padding : "100px"
 };
