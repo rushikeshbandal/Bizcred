@@ -166,7 +166,3 @@ const row = {
   gap: "20px",
 };
 
-const h1 = {
-  marginTop :"100px" ,
-  padding : "100px"
-};
