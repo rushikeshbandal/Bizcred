@@ -216,6 +216,7 @@ const container = {
   padding: "30px",
   background: "#f5f6fa",
   minHeight: "100vh",
+  paddingTop: "80px",
 };
 
 const title = {

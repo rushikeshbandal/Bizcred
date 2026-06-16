@@ -504,6 +504,7 @@ const container = {
     "linear-gradient(135deg,#eef2ff,#f9fafc)",
 
   minHeight: "100vh",
+  paddingTop: "80px",
 };
 
 const title = {
