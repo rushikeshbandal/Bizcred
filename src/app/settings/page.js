@@ -490,6 +490,7 @@ export default function SettingsPage() {
 
 const container = {
   padding: "30px",
+  paddingTop: "100px",
   background: "#f4f7fe",
   minHeight: "100vh",
 };
