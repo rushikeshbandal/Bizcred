@@ -4,17 +4,17 @@ import { useEffect, useState } from "react";
 
 export default function SettingsPage() {
   const [settings, setSettings] = useState(null);
-
-  const fetchSettings = async () => {
-    const res = await fetch("/api/admin/settings");
-    const data = await res.json();
-
-    setSettings(data.settings);
-  };
+  const [activeTab, setActiveTab] = useState("general");
 
   useEffect(() => {
     fetchSettings();
   }, []);
+
+  const fetchSettings = async () => {
+    const res = await fetch("/api/admin/settings");
+    const data = await res.json();
+    setSettings(data.settings);
+  };
 
   const handleSave = async () => {
     const res = await fetch("/api/admin/settings", {
@@ -26,219 +26,227 @@ export default function SettingsPage() {
     });
 
     const data = await res.json();
-
     alert(data.message);
   };
 
-  if (!settings) {
-    return <h2>Loading...</h2>;
-  }
+  if (!settings) return <div>Loading...</div>;
 
   return (
-    <div style={{ padding: "20px" }}>
-      <h1>Admin Settings</h1>
+    <div className="p-6">
+      {/* Header */}
 
-      <hr />
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-gray-500">
+            Manage system configurations
+          </p>
+        </div>
 
-      <h2>General Settings</h2>
-     
-      <input
-        placeholder="Company Name"
-        value={settings.general.companyName}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            general: {
-              ...settings.general,
-              companyName: e.target.value,
-            },
-          })
-        }
-      />
-    
-      <br /><br />
+        <button
+          onClick={handleSave}
+          className="bg-blue-600 text-white px-5 py-2 rounded-lg"
+        >
+          Save Changes
+        </button>
+      </div>
 
-      <input
-        placeholder="Support Email"
-        value={settings.general.supportEmail}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            general: {
-              ...settings.general,
-              supportEmail: e.target.value,
-            },
-          })
-        }
-      />
+      {/* Tabs */}
 
-      <br /><br />
+      <div className="flex gap-3 mb-6">
+        <button
+          onClick={() => setActiveTab("general")}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === "general"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200"
+          }`}
+        >
+          General
+        </button>
 
-      <input
-        placeholder="Contact Number"
-        value={settings.general.contactNumber}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            general: {
-              ...settings.general,
-              contactNumber: e.target.value,
-            },
-          })
-        }
-      />
+        <button
+          onClick={() => setActiveTab("email")}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === "email"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200"
+          }`}
+        >
+          Email
+        </button>
 
-      <hr />
+        <button
+          onClick={() => setActiveTab("kyc")}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === "kyc"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200"
+          }`}
+        >
+          KYC
+        </button>
 
-      <h2>Email Settings</h2>
+        <button
+          onClick={() => setActiveTab("notifications")}
+          className={`px-4 py-2 rounded-lg ${
+            activeTab === "notifications"
+              ? "bg-blue-600 text-white"
+              : "bg-gray-200"
+          }`}
+        >
+          Notifications
+        </button>
+      </div>
 
-      <input
-        placeholder="SMTP Host"
-        value={settings.email.smtpHost}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            email: {
-              ...settings.email,
-              smtpHost: e.target.value,
-            },
-          })
-        }
-      />
+      {/* Content Card */}
 
-      <br /><br />
+      <div className="bg-white rounded-xl shadow-md p-6">
 
-      <input
-        placeholder="SMTP Port"
-        value={settings.email.smtpPort}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            email: {
-              ...settings.email,
-              smtpPort: e.target.value,
-            },
-          })
-        }
-      />
+        {activeTab === "general" && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">
+              General Settings
+            </h2>
 
-      <hr />
+            <div className="grid md:grid-cols-2 gap-4">
 
-      <h2>KYC Settings</h2>
+              <div>
+                <label className="block mb-2 font-medium">
+                  Company Name
+                </label>
 
-      <label>
-        Enable KYC
-        <input
-          type="checkbox"
-          checked={settings.kyc.enabled}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              kyc: {
-                ...settings.kyc,
-                enabled: e.target.checked,
-              },
-            })
-          }
-        />
-      </label>
+                <input
+                  className="w-full border rounded-lg p-3"
+                  value={settings.general.companyName}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      general: {
+                        ...settings.general,
+                        companyName: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
 
-      <br /><br />
+              <div>
+                <label className="block mb-2 font-medium">
+                  Support Email
+                </label>
 
-      <input
-        placeholder="Provider"
-        value={settings.kyc.provider}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            kyc: {
-              ...settings.kyc,
-              provider: e.target.value,
-            },
-          })
-        }
-      />
+                <input
+                  className="w-full border rounded-lg p-3"
+                  value={settings.general.supportEmail}
+                  onChange={(e) =>
+                    setSettings({
+                      ...settings,
+                      general: {
+                        ...settings.general,
+                        supportEmail: e.target.value,
+                      },
+                    })
+                  }
+                />
+              </div>
 
-      <br /><br />
+            </div>
+          </>
+        )}
 
-      <input
-        placeholder="Verification Limit"
-        value={settings.kyc.verificationLimit}
-        onChange={(e) =>
-          setSettings({
-            ...settings,
-            kyc: {
-              ...settings.kyc,
-              verificationLimit: e.target.value,
-            },
-          })
-        }
-      />
+        {activeTab === "email" && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">
+              Email Settings
+            </h2>
 
-      <hr />
+            <div className="grid md:grid-cols-2 gap-4">
 
-      <h2>Notification Settings</h2>
+              <input
+                className="border rounded-lg p-3"
+                placeholder="SMTP Host"
+                value={settings.email.smtpHost}
+              />
 
-      <label>
-        Email Notifications
-        <input
-          type="checkbox"
-          checked={settings.notifications.emailNotifications}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              notifications: {
-                ...settings.notifications,
-                emailNotifications: e.target.checked,
-              },
-            })
-          }
-        />
-      </label>
+              <input
+                className="border rounded-lg p-3"
+                placeholder="SMTP Port"
+                value={settings.email.smtpPort}
+              />
 
-      <br /><br />
+            </div>
+          </>
+        )}
 
-      <label>
-        SMS Notifications
-        <input
-          type="checkbox"
-          checked={settings.notifications.smsNotifications}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              notifications: {
-                ...settings.notifications,
-                smsNotifications: e.target.checked,
-              },
-            })
-          }
-        />
-      </label>
+        {activeTab === "kyc" && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">
+              KYC Settings
+            </h2>
 
-      <br /><br />
+            <div className="space-y-4">
 
-      <label>
-        Push Notifications
-        <input
-          type="checkbox"
-          checked={settings.notifications.pushNotifications}
-          onChange={(e) =>
-            setSettings({
-              ...settings,
-              notifications: {
-                ...settings.notifications,
-                pushNotifications: e.target.checked,
-              },
-            })
-          }
-        />
-      </label>
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={settings.kyc.enabled}
+                />
+                Enable KYC Verification
+              </label>
 
-      <br /><br />
+              <input
+                className="border rounded-lg p-3 w-full"
+                placeholder="Provider"
+                value={settings.kyc.provider}
+              />
+            </div>
+          </>
+        )}
 
-      <button onClick={handleSave}>
-        Save Settings
-      </button>
+        {activeTab === "notifications" && (
+          <>
+            <h2 className="text-xl font-semibold mb-4">
+              Notification Settings
+            </h2>
+
+            <div className="space-y-4">
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={
+                    settings.notifications.emailNotifications
+                  }
+                />
+                Email Notifications
+              </label>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={
+                    settings.notifications.smsNotifications
+                  }
+                />
+                SMS Notifications
+              </label>
+
+              <label className="flex items-center gap-3">
+                <input
+                  type="checkbox"
+                  checked={
+                    settings.notifications.pushNotifications
+                  }
+                />
+                Push Notifications
+              </label>
+
+            </div>
+          </>
+        )}
+
+      </div>
     </div>
   );
 }
