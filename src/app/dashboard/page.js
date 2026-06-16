@@ -547,6 +547,7 @@ const container = {
   minHeight: "100vh",
   background: "#f4f7fe",
   fontFamily: "Arial",
+  paddingTop: "50px",
 };
 
 const sidebar = {
