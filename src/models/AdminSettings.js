@@ -1,4 +1,3 @@
-
 import mongoose from "mongoose";
 
 const AdminSettingsSchema = new mongoose.Schema(
@@ -14,28 +13,38 @@ const AdminSettingsSchema = new mongoose.Schema(
         default: "",
       },
 
-      supportPhone: {
-        type: String,
-        default: "",
-      },
-
-      website: {
+      contactNumber: {
         type: String,
         default: "",
       },
     },
 
     email: {
-      smtpHost: String,
-      smtpPort: Number,
-      smtpUser: String,
-      smtpPassword: String,
+      smtpHost: {
+        type: String,
+        default: "",
+      },
+
+      smtpPort: {
+        type: Number,
+        default: 587,
+      },
+
+      smtpUser: {
+        type: String,
+        default: "",
+      },
+
+      smtpPassword: {
+        type: String,
+        default: "",
+      },
     },
 
     kyc: {
       enabled: {
         type: Boolean,
-        default: false,
+        default: true,
       },
 
       provider: {
@@ -43,9 +52,9 @@ const AdminSettingsSchema = new mongoose.Schema(
         default: "Didit",
       },
 
-      autoApprove: {
-        type: Boolean,
-        default: false,
+      verificationLimit: {
+        type: Number,
+        default: 5,
       },
     },
 
@@ -65,23 +74,6 @@ const AdminSettingsSchema = new mongoose.Schema(
         default: true,
       },
     },
-
-    security: {
-      sessionTimeout: {
-        type: Number,
-        default: 30,
-      },
-
-      maxLoginAttempts: {
-        type: Number,
-        default: 5,
-      },
-
-      enable2FA: {
-        type: Boolean,
-        default: false,
-      },
-    },
   },
   {
     timestamps: true,
@@ -89,7 +81,4 @@ const AdminSettingsSchema = new mongoose.Schema(
 );
 
 export default mongoose.models.AdminSettings ||
-  mongoose.model(
-    "AdminSettings",
-    AdminSettingsSchema
-  );
+  mongoose.model("AdminSettings", AdminSettingsSchema);

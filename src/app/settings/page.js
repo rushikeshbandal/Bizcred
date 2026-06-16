@@ -2,167 +2,243 @@
 
 import { useEffect, useState } from "react";
 
-export default function Settings() {
-  const [settings, setSettings] =
-    useState(null);
+export default function SettingsPage() {
+  const [settings, setSettings] = useState(null);
 
-  useEffect(() => {
-    loadSettings();
-  }, []);
-
-  const loadSettings = async () => {
-    const token =
-      localStorage.getItem("token");
-
-    const res = await fetch(
-      "/api/admin/settings",
-      {
-        headers: {
-          Authorization:
-            "Bearer " + token,
-        },
-      }
-    );
-
+  const fetchSettings = async () => {
+    const res = await fetch("/api/admin/settings");
     const data = await res.json();
 
     setSettings(data.settings);
   };
 
-  const saveSettings = async () => {
-    const token =
-      localStorage.getItem("token");
+  useEffect(() => {
+    fetchSettings();
+  }, []);
 
-    const res = await fetch(
-      "/api/admin/settings",
-      {
-        method: "PUT",
-
-        headers: {
-          "Content-Type":
-            "application/json",
-
-          Authorization:
-            "Bearer " + token,
-        },
-
-        body: JSON.stringify(settings),
-      }
-    );
+  const handleSave = async () => {
+    const res = await fetch("/api/admin/settings", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(settings),
+    });
 
     const data = await res.json();
 
     alert(data.message);
   };
 
-  if (!settings)
+  if (!settings) {
     return <h2>Loading...</h2>;
+  }
 
   return (
-    <div
-      style={{
-        padding: "30px",
-      }}
-    >
-      <h1>⚙️ Settings</h1>
+    <div style={{ padding: "20px" }}>
+      <h1>Admin Settings</h1>
 
-      <div style={card}>
-        <h2>General Settings</h2>
+      <hr />
 
-       <div>
-         <label>Company Name</label>
-           <input
-               style={input}
-               placeholder="Company Name"
-           />
-        </div>
-         <div>
-         <label>Support Email</label>
-           <input
-               style={input}
-               placeholder="Support Email"
-           />
-        </div>
+      <h2>General Settings</h2>
 
-       
+      <input
+        placeholder="Company Name"
+        value={settings.general.companyName}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            general: {
+              ...settings.general,
+              companyName: e.target.value,
+            },
+          })
+        }
+      />
 
-        <div>
-         <label>Support Phone</label>
-           <input
-               style={input}
-               placeholder="Support Phone"
-           />
-        </div>
-      </div>
+      <br /><br />
 
-      <div style={card}>
-        <h2>KYC Settings</h2>
+      <input
+        placeholder="Support Email"
+        value={settings.general.supportEmail}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            general: {
+              ...settings.general,
+              supportEmail: e.target.value,
+            },
+          })
+        }
+      />
 
-        <label>
-          Enable KYC
-        </label>
+      <br /><br />
 
+      <input
+        placeholder="Contact Number"
+        value={settings.general.contactNumber}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            general: {
+              ...settings.general,
+              contactNumber: e.target.value,
+            },
+          })
+        }
+      />
+
+      <hr />
+
+      <h2>Email Settings</h2>
+
+      <input
+        placeholder="SMTP Host"
+        value={settings.email.smtpHost}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            email: {
+              ...settings.email,
+              smtpHost: e.target.value,
+            },
+          })
+        }
+      />
+
+      <br /><br />
+
+      <input
+        placeholder="SMTP Port"
+        value={settings.email.smtpPort}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            email: {
+              ...settings.email,
+              smtpPort: e.target.value,
+            },
+          })
+        }
+      />
+
+      <hr />
+
+      <h2>KYC Settings</h2>
+
+      <label>
+        Enable KYC
         <input
           type="checkbox"
-          checked={
-            settings.kyc.enabled
-          }
+          checked={settings.kyc.enabled}
           onChange={(e) =>
             setSettings({
               ...settings,
               kyc: {
                 ...settings.kyc,
-                enabled:
-                  e.target.checked,
+                enabled: e.target.checked,
               },
             })
           }
         />
-      </div>
+      </label>
 
-      <button
-        onClick={saveSettings}
-        style={btn}
-      >
+      <br /><br />
+
+      <input
+        placeholder="Provider"
+        value={settings.kyc.provider}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            kyc: {
+              ...settings.kyc,
+              provider: e.target.value,
+            },
+          })
+        }
+      />
+
+      <br /><br />
+
+      <input
+        placeholder="Verification Limit"
+        value={settings.kyc.verificationLimit}
+        onChange={(e) =>
+          setSettings({
+            ...settings,
+            kyc: {
+              ...settings.kyc,
+              verificationLimit: e.target.value,
+            },
+          })
+        }
+      />
+
+      <hr />
+
+      <h2>Notification Settings</h2>
+
+      <label>
+        Email Notifications
+        <input
+          type="checkbox"
+          checked={settings.notifications.emailNotifications}
+          onChange={(e) =>
+            setSettings({
+              ...settings,
+              notifications: {
+                ...settings.notifications,
+                emailNotifications: e.target.checked,
+              },
+            })
+          }
+        />
+      </label>
+
+      <br /><br />
+
+      <label>
+        SMS Notifications
+        <input
+          type="checkbox"
+          checked={settings.notifications.smsNotifications}
+          onChange={(e) =>
+            setSettings({
+              ...settings,
+              notifications: {
+                ...settings.notifications,
+                smsNotifications: e.target.checked,
+              },
+            })
+          }
+        />
+      </label>
+
+      <br /><br />
+
+      <label>
+        Push Notifications
+        <input
+          type="checkbox"
+          checked={settings.notifications.pushNotifications}
+          onChange={(e) =>
+            setSettings({
+              ...settings,
+              notifications: {
+                ...settings.notifications,
+                pushNotifications: e.target.checked,
+              },
+            })
+          }
+        />
+      </label>
+
+      <br /><br />
+
+      <button onClick={handleSave}>
         Save Settings
       </button>
     </div>
   );
 }
-
-const card = {
-  background: "#fff",
-  padding: "25px",
-  borderRadius: "20px",
-  marginBottom: "25px",
-  boxShadow: "0 5px 15px rgba(0,0,0,0.05)",
-};
-const btn = {
-  background: "#667eea",
-  color: "#fff",
-  padding: "12px 20px",
-  border: "none",
-  borderRadius: "10px",
-  cursor: "pointer",
-};
-const input = {
-  width: "100%",
-  padding: "12px 15px",
-  border: "1px solid #d1d5db",
-  borderRadius: "10px",
-  fontSize: "14px",
-  outline: "none",
-  marginTop: "8px",
-};
-
-const sectionTitle = {
-  marginBottom: "20px",
-  color: "#111827",
-};
-
-const row = {
-  display: "grid",
-  gridTemplateColumns: "repeat(auto-fit,minmax(250px,1fr))",
-  gap: "20px",
-};
-

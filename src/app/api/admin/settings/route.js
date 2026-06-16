@@ -1,19 +1,14 @@
 import { connectDB } from "@/config/db";
 import AdminSettings from "@/models/AdminSettings";
-import { verifyAdmin } from "@/middleware/authMiddleware";
 
-export async function GET(req) {
+export async function GET() {
   try {
     await connectDB();
 
-    verifyAdmin(req);
-
-    let settings =
-      await AdminSettings.findOne();
+    let settings = await AdminSettings.findOne();
 
     if (!settings) {
-      settings =
-        await AdminSettings.create({});
+      settings = await AdminSettings.create({});
     }
 
     return Response.json({
@@ -26,27 +21,21 @@ export async function GET(req) {
         success: false,
         message: error.message,
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
 
-export async function PUT(req) {
+export async function POST(req) {
   try {
     await connectDB();
 
-    verifyAdmin(req);
-
     const body = await req.json();
 
-    let settings =
-      await AdminSettings.findOne();
+    let settings = await AdminSettings.findOne();
 
     if (!settings) {
-      settings =
-        new AdminSettings(body);
+      settings = new AdminSettings(body);
     } else {
       Object.assign(settings, body);
     }
@@ -55,8 +44,7 @@ export async function PUT(req) {
 
     return Response.json({
       success: true,
-      message:
-        "Settings updated successfully",
+      message: "Settings Saved Successfully",
     });
   } catch (error) {
     return Response.json(
@@ -64,9 +52,7 @@ export async function PUT(req) {
         success: false,
         message: error.message,
       },
-      {
-        status: 500,
-      }
+      { status: 500 }
     );
   }
 }
