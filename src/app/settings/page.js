@@ -41,7 +41,7 @@ export default function SettingsPage() {
       <hr />
 
       <h2>General Settings</h2>
-
+     
       <input
         placeholder="Company Name"
         value={settings.general.companyName}
@@ -55,7 +55,7 @@ export default function SettingsPage() {
           })
         }
       />
-
+    
       <br /><br />
 
       <input
