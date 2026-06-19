@@ -34,7 +34,7 @@ creditScore: {type: Number,default: 0},
       "in_progress",
       "in_review"
     ],
-    default: "pending"
+    default:  "not_submitted"
   },
 
   verificationData: mongoose.Schema.Types.Mixed,
