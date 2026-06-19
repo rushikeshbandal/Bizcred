@@ -103,6 +103,7 @@ const loadCustomers = async () => {
             <th style={thStyle}>ID</th>
             <th style={thStyle}>Name</th>
             <th style={thStyle}>Email</th>
+            <th style={thStyle}>Credit Score</th>
             <th style={thStyle}>Status</th>
             <th style={thStyle}>Action</th>
           </tr>
@@ -115,6 +116,23 @@ const loadCustomers = async () => {
         <td style={tdStyle}>{customer.id}</td>
         <td style={tdStyle}>{customer.name}</td>
         <td style={tdStyle}>{customer.email}</td>
+        
+
+<td style={tdStyle}>
+  <span
+    style={{
+      fontWeight: "bold",
+      color:
+        customer.creditScore >= 750
+          ? "#28a745"
+          : customer.creditScore >= 650
+          ? "#ffc107"
+          : "#dc3545",
+    }}
+  >
+    {customer.creditScore}
+  </span>
+</td>
 
         <td style={tdStyle}>
           <span
@@ -191,7 +209,22 @@ const loadCustomers = async () => {
               <p>
                 <strong>Aadhaar:</strong> {customer.aadhaar}
               </p>
-
+              <p>
+                <strong>Credit Score:</strong>{" "}
+                 <span
+                   style={{
+                     fontWeight: "bold",
+                        color:
+                       customer.creditScore >= 750
+                             ? "#28a745"
+                              : customer.creditScore >= 650
+                               ? "#ffc107"
+                               : "#dc3545",
+    }}
+  >
+    {selectedCustomer.creditScore}
+  </span>
+</p>
               <p>
                 <strong>Status:</strong>{" "}
                 <span
