@@ -34,11 +34,11 @@ const loadCustomers = async () => {
 
   const getStatusColor = (status) => {
     switch (status) {
-      case "Verified":
+      case "verified":
         return "#28a745";
-      case "Rejected":
+      case "rejected":
         return "#dc3545";
-      case "Pending":
+      case "pending":
         return "#ffc107";
       default:
         return "#6c757d";

@@ -19,7 +19,7 @@ export async function GET(req) {
       pan: u.kyc?.pan || "-",
       aadhaar: u.kyc?.aadhaar || "-",
 
-      kycStatus: u.kyc?.status || "Pending",
+      kycStatus: u.kyc?.status || "pending",
 
       // Credit Score from MongoDB
       creditScore: u.creditScore || 0,
