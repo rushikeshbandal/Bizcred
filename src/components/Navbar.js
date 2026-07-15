@@ -33,8 +33,11 @@ export default function Navbar() {
   }, []);
 
   // HIDE NAVBAR ON LOGIN PAGE
-  if (pathname === "/login") return null;
-
+if (
+  pathname === "/login" || pathname === "/customer/register" || pathname === "/customer/login" ||pathname === "/customer/dashboard"
+) {
+  return null;
+}
   const logout = () => {
     localStorage.removeItem("token");
     router.push("/login");
