@@ -5,7 +5,6 @@ import { useRouter, usePathname } from "next/navigation";
 export default function Navbar() {
   const [open, setOpen] = useState(false);
 
-  // ✅ STATIC ADMIN USER
   const [user, setUser] = useState({
     name: "Admin",
     email: "admin@bizcred.com",
@@ -17,7 +16,6 @@ export default function Navbar() {
   const dropdownRef = useRef();
   const timeoutRef = useRef();
 
-  // CLOSE ON OUTSIDE CLICK
   useEffect(() => {
     const handleClick = (e) => {
       if (dropdownRef.current && !dropdownRef.current.contains(e.target)) {
@@ -32,12 +30,38 @@ export default function Navbar() {
     };
   }, []);
 
-  // HIDE NAVBAR ON LOGIN PAGE
-if (
-  pathname === "/login" || pathname === "/customer/register" || pathname === "/customer/login" ||pathname === "/customer/dashboard"
-) {
-  return null;
-}
+  // HIDE NAVBAR on every admin page (they now use AdminShell's own nav)
+  // and every customer page (they use their own layout/sidebar).
+  const adminRoutes = [
+    "/dashboard",
+    "/users",
+    "/transactions",
+    "/wallet",
+    "/kyc",
+    "/add-user",
+    "/settings",
+    "/security",
+    "/support",
+  ];
+
+  const customerRoutes = [
+    "/login",
+    "/customer/register",
+    "/customer/login",
+    "/customer/dashboard",
+    "/customer/kyc",
+    "/customer/profile",
+    "/customer/support",
+    "/customer/settings",
+    "/customer/transactions",
+    "/customer/wallet",
+    "/customer/profile/edit",
+  ];
+
+  if (adminRoutes.includes(pathname) || customerRoutes.includes(pathname)) {
+    return null;
+  }
+
   const logout = () => {
     localStorage.removeItem("token");
     router.push("/login");
@@ -55,8 +79,6 @@ if (
 
   return (
     <div style={nav}>
-      
-      {/* ✅ LOGO */}
       <img
         src="/BizCred-logo.png"
         alt="BizCred Logo"
@@ -64,88 +86,53 @@ if (
         onClick={() => router.push("/dashboard")}
       />
 
-      {/* USER SECTION */}
       <div
         ref={dropdownRef}
         style={userBox}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
       >
-        {/* AVATAR */}
         <div style={avatar} onClick={() => setOpen(!open)}>
           {user?.name?.charAt(0)?.toUpperCase() || "A"}
         </div>
 
-        {/* DROPDOWN */}
         {open && (
           <div style={dropdown}>
-            
             <p style={name}>{user?.name}</p>
             <p style={email}>{user?.email}</p>
 
             <div style={divider}></div>
 
-            <p
-              onClick={() => router.push("/dashboard")}
-              style={item}
-            >
+            <p onClick={() => router.push("/dashboard")} style={item}>
               📊 Dashboard
             </p>
-
-            <p
-              onClick={() => router.push("/users")}
-              style={item}
-            >
+            <p onClick={() => router.push("/users")} style={item}>
               👥 Users
             </p>
-
-            <p
-              onClick={() => router.push("/transactions")}
-              style={item}
-            >
+            <p onClick={() => router.push("/transactions")} style={item}>
               📜 Transactions
             </p>
-
-            <p
-              onClick={() => router.push("/wallet")}
-              style={item}
-            >
+            <p onClick={() => router.push("/wallet")} style={item}>
               💰 Wallet
             </p>
-
-            <p
-              onClick={() => router.push("/kyc")}
-              style={item}
-            >
+            <p onClick={() => router.push("/kyc")} style={item}>
               🧾 KYC
             </p>
-
-            <p
-              onClick={() => router.push("/add-user")}
-              style={item}
-            >
+            <p onClick={() => router.push("/add-user")} style={item}>
               ➕ Add User
             </p>
 
             <div style={divider}></div>
 
-            <p
-              onClick={logout}
-              style={{ ...item, color: "red" }}
-            >
+            <p onClick={logout} style={{ ...item, color: "red" }}>
               🚪 Logout
             </p>
-
           </div>
         )}
       </div>
     </div>
   );
 }
-
-//
-// 🎨 STYLES
-//
 
 const nav = {
   position: "fixed",

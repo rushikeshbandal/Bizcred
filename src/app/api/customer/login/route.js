@@ -66,9 +66,8 @@ export async function POST(req) {
       );
     }
 
-    // ---- Generate OTP ----
-    const otp = Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
-    const expiresAt = new Date(Date.now() + 5 * 60 * 1000); // 5 minutes
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+    const expiresAt = new Date(Date.now() + 5 * 60 * 1000);
 
     const ip =
       req.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
@@ -77,12 +76,13 @@ export async function POST(req) {
 
     const browser = req.headers.get("user-agent") || "Unknown";
 
-    // Upsert so re-requesting OTP for the same email replaces the old one
+    // NEW: filter scoped to purpose: "login" so it never touches an email_change record
     await OtpVerification.findOneAndUpdate(
-      { email },
+      { email, purpose: "login" },
       {
         email,
         otp,
+        purpose: "login",
         selfie,
         latitude,
         longitude,

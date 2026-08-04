@@ -1,402 +1,264 @@
 "use client";
 
-
 import { useState, useEffect } from "react";
+import AdminShell from "@/components/admin-components/AdminShell";
 
-export default function Page() {
- const [customers, setCustomers] = useState([]);
-const [loading, setLoading] = useState(true);
+export default function AdminKycPage() {
+  const [customers, setCustomers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [expandedId, setExpandedId] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
 
-useEffect(() => {
-  loadCustomers();
-}, []);
+  useEffect(() => {
+    loadCustomers();
+  }, []);
 
-const loadCustomers = async () => {
-  try {
-    const res = await fetch("/api/admin/kyc-users", {
-      headers: {
-        Authorization:
-          "Bearer " + localStorage.getItem("token"),
-      },
-    });
-
-    const data = await res.json();
-
-    setCustomers(data);
-  } catch (error) {
-    console.error(error);
-  } finally {
-    setLoading(false);
-  }
-};
-
-  const [selectedCustomer, setSelectedCustomer] = useState(null);
-
-  const getStatusColor = (status) => {
-    switch (status) {
-      case "verified":
-        return "#28a745";
-      case "rejected":
-        return "#dc3545";
-      case "pending":
-        return "#ffc107";
-      default:
-        return "#6c757d";
-    }
-  };
-
-  const updateKYCStatus = (id, newStatus) => {
-    const updatedCustomers = customers.map((customer) =>
-      customer.id === id
-        ? { ...customer, kycStatus: newStatus }
-        : customer
-    );
-
-    setCustomers(updatedCustomers);
-
-    if (selectedCustomer?.id === id) {
-      setSelectedCustomer({
-        ...selectedCustomer,
-        kycStatus: newStatus,
+  const loadCustomers = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const res = await fetch("/api/admin/kyc-users", {
+        headers: { Authorization: "Bearer " + localStorage.getItem("token") },
       });
+      const data = await res.json();
+
+      if (!data.success) {
+        setError(data.message || "Failed to load customers.");
+        setCustomers([]);
+      } else {
+        setCustomers(data.customers || []);
+      }
+    } catch (err) {
+      console.error(err);
+      setError("Failed to load customers.");
+    }
+    setLoading(false);
+  };
+
+  const updateKycStatus = async (userId, newStatus) => {
+    setActionLoading(true);
+    try {
+      const res = await fetch(`/api/admin/kyc-users/${userId}`, {
+        method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: "Bearer " + localStorage.getItem("token"),
+        },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        alert(data.message || "Failed to update status.");
+      } else {
+        setCustomers((prev) =>
+          prev.map((c) => (c._id === userId ? { ...c, kyc: { ...c.kyc, status: newStatus } } : c))
+        );
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Something went wrong.");
+    }
+    setActionLoading(false);
+  };
+
+  const statusColor = (status) => {
+    switch (status) {
+      case "approved":
+        return { bg: "#e9f8ef", text: "#0f7a3d" };
+      case "rejected":
+        return { bg: "#fceeed", text: "#b3261e" };
+      case "pending":
+        return { bg: "#fffaf0", text: "#b45309" };
+      default:
+        return { bg: "#f3f4f6", text: "#6b7280" };
     }
   };
-  const fetchDiditDetails = async (sessionId) => {
-  try {
-    const res = await fetch(
-      `/api/admin/kyc-details/${sessionId}`
-    );
 
-    const data = await res.json();
-
-    alert(
-      `Status: ${data.status || data.decision_status}`
+  if (loading) {
+    return (
+      <AdminShell pageTitle="Customer KYC Management">
+        <p style={styles.loadingText}>Loading customers...</p>
+      </AdminShell>
     );
-  } catch (error) {
-    console.error(error);
   }
-};
 
   return (
-    <div
+    <AdminShell pageTitle="Customer KYC Management" pageSubtitle="Review Aadhaar and PAN verification results">
+      {error && <div style={styles.errorBox}>{error}</div>}
+
+      <div style={styles.tableWrap}>
+        <table style={styles.table}>
+          <thead>
+            <tr style={styles.theadRow}>
+              <th style={styles.th}>Name</th>
+              <th style={styles.th}>Email</th>
+              <th style={styles.th}>Aadhaar</th>
+              <th style={styles.th}>PAN</th>
+              <th style={styles.th}>KYC Status</th>
+              <th style={styles.th}>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {customers.map((customer) => {
+              const kyc = customer.kyc || {};
+              const colors = statusColor(kyc.status);
+              const isExpanded = expandedId === customer._id;
+
+              return (
+                <>
+                  <tr key={customer._id} style={styles.row}>
+                    <td style={styles.td}>{customer.name}</td>
+                    <td style={styles.td}>{customer.email}</td>
+                    <td style={styles.td}>
+                      <VerifyBadge verified={kyc.aadhaarVerified} />
+                    </td>
+                    <td style={styles.td}>
+                      <VerifyBadge verified={kyc.panVerified} />
+                    </td>
+                    <td style={styles.td}>
+                      <span style={{ ...styles.statusPill, background: colors.bg, color: colors.text }}>
+                        {kyc.status || "not_submitted"}
+                      </span>
+                    </td>
+                    <td style={styles.td}>
+                      <button
+                        style={styles.viewButton}
+                        onClick={() => setExpandedId(isExpanded ? null : customer._id)}
+                      >
+                        {isExpanded ? "Hide" : "View"}
+                      </button>
+                    </td>
+                  </tr>
+
+                  {isExpanded && (
+                    <tr>
+                      <td colSpan="6" style={styles.expandCell}>
+                        <div style={styles.expandCard}>
+                          <div style={styles.detailGrid}>
+                            <DetailBlock title="Account">
+                              <DetailRow label="Name" value={customer.name} />
+                              <DetailRow label="Email" value={customer.email} />
+                              <DetailRow label="Mobile" value={customer.mobile} />
+                              <DetailRow label="Account Status" value={customer.status} />
+                            </DetailBlock>
+
+                            <DetailBlock title="Aadhaar">
+                              <DetailRow label="Verified" value={kyc.aadhaarVerified ? "Yes" : "No"} />
+                              <DetailRow
+                                label="Number"
+                                value={kyc.aadhaar ? `XXXX XXXX ${kyc.aadhaar}` : "Not provided"}
+                              />
+                              <DetailRow label="Name on Aadhaar" value={kyc.aadhaarName} />
+                              <DetailRow label="DOB" value={kyc.aadhaarDob} />
+                              <DetailRow label="Gender" value={kyc.aadhaarGender} />
+                              <DetailRow label="Address" value={kyc.aadhaarAddress} />
+                            </DetailBlock>
+
+                            <DetailBlock title="PAN">
+                              <DetailRow label="Verified" value={kyc.panVerified ? "Yes" : "No"} />
+                              <DetailRow label="Number" value={kyc.pan || "Not provided"} />
+                              <DetailRow label="Category" value={kyc.panVerifiedCategory} />
+                              <DetailRow label="Status" value={kyc.panVerifiedStatus} />
+                              <DetailRow
+                                label="Name Match"
+                                value={kyc.panNameMatch === undefined ? "—" : kyc.panNameMatch ? "Yes" : "No"}
+                              />
+                              <DetailRow
+                                label="DOB Match"
+                                value={kyc.panDobMatch === undefined ? "—" : kyc.panDobMatch ? "Yes" : "No"}
+                              />
+                            </DetailBlock>
+                          </div>
+
+                          <div style={styles.actionRow}>
+                            <button
+                              style={{ ...styles.actionButton, background: "#0f7a3d" }}
+                              onClick={() => updateKycStatus(customer._id, "approved")}
+                              disabled={actionLoading || !kyc.aadhaarVerified || !kyc.panVerified}
+                              title={
+                                !kyc.aadhaarVerified || !kyc.panVerified
+                                  ? "Both Aadhaar and PAN must be verified first"
+                                  : ""
+                              }
+                            >
+                              Approve
+                            </button>
+                            <button
+                              style={{ ...styles.actionButton, background: "#b3261e" }}
+                              onClick={() => updateKycStatus(customer._id, "rejected")}
+                              disabled={actionLoading}
+                            >
+                              Reject
+                            </button>
+                          </div>
+                        </div>
+                      </td>
+                    </tr>
+                  )}
+                </>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </AdminShell>
+  );
+}
+
+function VerifyBadge({ verified }) {
+  return (
+    <span
       style={{
-        maxWidth: "1200px",
-        margin: "30px auto",
-        padding: "20px",
-        fontFamily: "Arial, sans-serif",
+        ...styles.verifyBadge,
+        background: verified ? "#e9f8ef" : "#fceeed",
+        color: verified ? "#0f7a3d" : "#b3261e",
       }}
     >
-      <h1
-      style={{margin:"10px",padding:"10px"}}>Customer KYC Management</h1>
+      {verified ? "Verified" : "Pending"}
+    </span>
+  );
+}
 
-      {/* Customer Table */}
-      <table
-        style={{
-          width: "100%",
-          borderCollapse: "collapse",
-          background: "#fff",
-          boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-        }}
-      >
-        <thead>
-          <tr style={{ background: "#f5f5f5" }}>
-            <th style={thStyle}>ID</th>
-            <th style={thStyle}>Name</th>
-            <th style={thStyle}>Email</th>
-            <th style={thStyle}>Credit Score</th>
-            <th style={thStyle}>Status</th>
-            <th style={thStyle}>Action</th>
-          </tr>
-        </thead>
-
-        <tbody>
-  {customers.map((customer) => (
-    <>
-      <tr key={customer.id}>
-        <td style={tdStyle}>{customer.id}</td>
-        <td style={tdStyle}>{customer.name}</td>
-        <td style={tdStyle}>{customer.email}</td>
-        
-
-<td style={tdStyle}>
-  <span
-    style={{
-      fontWeight: "bold",
-      color:
-        customer.creditScore >= 750
-          ? "#28a745"
-          : customer.creditScore >= 650
-          ? "#ffc107"
-          : "#dc3545",
-    }}
-  >
-    {customer.creditScore}
-  </span>
-</td>
-
-        <td style={tdStyle}>
-          <span
-            style={{
-              background: getStatusColor(customer.kycStatus),
-              color: "white",
-              padding: "5px 12px",
-              borderRadius: "20px",
-            }}
-          >
-            {customer.kycStatus}
-          </span>
-        </td>
-
-        <td style={tdStyle}>
-          <button
-            onClick={() =>
-              setSelectedCustomer(
-                selectedCustomer?.id === customer.id
-                  ? null
-                  : customer
-              )
-            }
-            style={{
-              background: "#0070f3",
-              color: "#fff",
-              border: "none",
-              padding: "8px 15px",
-              borderRadius: "5px",
-              cursor: "pointer",
-            }}
-          >
-             {selectedCustomer?.id === customer.id? "Hide KYC": "View KYC"}
-          </button>
-        </td>
-      </tr>
-
-      {/* Expand Row */}
-      {selectedCustomer?.id === customer.id && (
-        <tr>
-          <td
-            colSpan="5"
-            style={{
-              padding: "20px",
-              background: "#f9f9f9",
-            }}
-          >
-            <div
-              style={{
-                background: "#fff",
-                padding: "20px",
-                borderRadius: "10px",
-                boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-              }}
-            >
-              <h3>KYC Details</h3>
-
-              <p>
-                <strong>Name:</strong> {customer.name}
-              </p>
-
-              <p>
-                <strong>Email:</strong> {customer.email}
-              </p>
-
-              <p>
-                <strong>Phone:</strong> {customer.phone}
-              </p>
-
-              <p>
-                <strong>PAN:</strong> {customer.pan}
-              </p>
-
-              <p>
-                <strong>Aadhaar:</strong> {customer.aadhaar}
-              </p>
-              <p>
-                <strong>Credit Score:</strong>{" "}
-                 <span
-                   style={{
-                     fontWeight: "bold",
-                        color:
-                       customer.creditScore >= 750
-                             ? "#28a745"
-                              : customer.creditScore >= 650
-                               ? "#ffc107"
-                               : "#dc3545",
-    }}
-  >
-    {selectedCustomer.creditScore}
-  </span>
-</p>
-              <p>
-                <strong>Status:</strong>{" "}
-                <span
-                  style={{
-                    color: getStatusColor(customer.kycStatus),
-                    fontWeight: "bold",
-                  }}
-                >
-                  {customer.kycStatus}
-                </span>
-              </p>
-
-              <div
-                style={{
-                  display: "flex",
-                  gap: "10px",
-                  marginTop: "15px",
-                }}
-              >
-                <button
-                  onClick={() => fetchDiditDetails(customer.sessionId)}
-                   style={{
-                     background: "#0070f3",
-                     color: "#fff",
-                     border: "none",
-                     padding: "10px 20px",
-                     borderRadius: "5px",
-                     cursor: "pointer",
-                   }}
-                 >
-                 Fetch Didit Result
-                </button>
-                <button
-                  onClick={() =>
-                    updateKYCStatus(customer.id, "Verified")
-                  }
-                  style={{
-                    background: "#28a745",
-                    color: "#fff",
-                    border: "none",
-                    padding: "10px 20px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Approve
-                </button>
-
-                <button
-                  onClick={() =>
-                    updateKYCStatus(customer.id, "Rejected")
-                  }
-                  style={{
-                    background: "#dc3545",
-                    color: "#fff",
-                    border: "none",
-                    padding: "10px 20px",
-                    borderRadius: "5px",
-                    cursor: "pointer",
-                  }}
-                >
-                  Reject
-                </button>
-
-              </div>
-            </div>
-          </td>
-        </tr>
-      )}
-    </>
-  ))}
-</tbody>
-      </table>
-
-      {/* KYC Details Card */}
-      {selectedCustomer && (
-        <div
-          style={{
-            marginTop: "30px",
-            background: "#fff",
-            padding: "25px",
-            borderRadius: "10px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)",
-          }}
-        >
-          <h2>KYC Details</h2>
-
-          <p>
-            <strong>Name:</strong> {selectedCustomer.name}
-          </p>
-
-          <p>
-            <strong>Email:</strong> {selectedCustomer.email}
-          </p>
-
-          <p>
-            <strong>Phone:</strong> {selectedCustomer.phone}
-          </p>
-
-          <p>
-            <strong>PAN:</strong> {selectedCustomer.pan}
-          </p>
-
-          <p>
-            <strong>Aadhaar:</strong> {selectedCustomer.aadhaar}
-          </p>
-
-          <p>
-            <strong>Status:</strong>{" "}
-            <span
-              style={{
-                color: getStatusColor(selectedCustomer.kycStatus),
-                fontWeight: "bold",
-              }}
-            >
-              {selectedCustomer.kycStatus}
-            </span>
-          </p>
-
-          {/* Approve/Reject Buttons */}
-          <div
-            style={{
-              marginTop: "20px",
-              display: "flex",
-              gap: "10px",
-            }}
-          >
-            <button
-              onClick={() =>
-                updateKYCStatus(selectedCustomer.id, "Verified")
-              }
-              style={{
-                background: "#28a745",
-                color: "white",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Approve
-            </button>
-
-            <button
-              onClick={() =>
-                updateKYCStatus(selectedCustomer.id, "Rejected")
-              }
-              style={{
-                background: "#dc3545",
-                color: "white",
-                border: "none",
-                padding: "10px 20px",
-                borderRadius: "5px",
-                cursor: "pointer",
-              }}
-            >
-              Reject
-            </button>
-          </div>
-        </div>
-      )}
+function DetailBlock({ title, children }) {
+  return (
+    <div style={styles.detailBlock}>
+      <h4 style={styles.detailBlockTitle}>{title}</h4>
+      {children}
     </div>
   );
 }
 
-const thStyle = {
-  padding: "12px",
-  textAlign: "left",
-  borderBottom: "1px solid #ddd",
-};
+function DetailRow({ label, value }) {
+  return (
+    <div style={styles.detailRow}>
+      <span style={styles.detailLabel}>{label}</span>
+      <span style={styles.detailValue}>{value || "—"}</span>
+    </div>
+  );
+}
 
-const tdStyle = {
-  padding: "12px",
-  borderBottom: "1px solid #ddd",
+const styles = {
+  loadingText: { textAlign: "center", color: "#6b7280", padding: "60px 0" },
+  errorBox: { background: "#fceeed", border: "1px solid #f5d0cc", color: "#b3261e", padding: "14px 16px", borderRadius: "10px", marginBottom: "16px", fontSize: "14px" },
+  tableWrap: { background: "#fff", borderRadius: "14px", border: "1px solid #e5e7eb", overflow: "hidden" },
+  table: { width: "100%", borderCollapse: "collapse" },
+  theadRow: { background: "#f9fafb" },
+  th: { padding: "14px 16px", textAlign: "left", fontSize: "12.5px", fontWeight: 600, color: "#6b7280", borderBottom: "1px solid #e5e7eb" },
+  row: { borderBottom: "1px solid #f3f4f6" },
+  td: { padding: "14px 16px", fontSize: "14px", color: "#111827" },
+  verifyBadge: { fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "20px" },
+  statusPill: { fontSize: "12px", fontWeight: 600, padding: "3px 10px", borderRadius: "20px", textTransform: "capitalize" },
+  viewButton: { background: "#1d4ed8", color: "#fff", border: "none", padding: "7px 14px", borderRadius: "6px", fontSize: "13px", fontWeight: 600, cursor: "pointer" },
+  expandCell: { padding: "16px", background: "#f9fafb" },
+  expandCard: { background: "#fff", border: "1px solid #e5e7eb", borderRadius: "12px", padding: "20px" },
+  detailGrid: { display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "20px", marginBottom: "18px" },
+  detailBlock: { minWidth: 0 },
+  detailBlockTitle: { fontSize: "13px", fontWeight: 700, color: "#111827", marginBottom: "10px" },
+  detailRow: { display: "flex", justifyContent: "space-between", gap: "10px", fontSize: "13px", padding: "6px 0", borderBottom: "1px solid #f3f4f6" },
+  detailLabel: { color: "#6b7280", flexShrink: 0 },
+  detailValue: { color: "#111827", fontWeight: 500, textAlign: "right" },
+  actionRow: { display: "flex", gap: "10px", borderTop: "1px solid #e5e7eb", paddingTop: "16px" },
+  actionButton: { color: "#fff", border: "none", padding: "10px 20px", borderRadius: "6px", cursor: "pointer", fontWeight: 600, fontSize: "13.5px" },
 };

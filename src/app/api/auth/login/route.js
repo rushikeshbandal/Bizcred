@@ -1,66 +1,53 @@
 import jwt from "jsonwebtoken";
+import bcrypt from "bcryptjs";
+import { connectDB } from "@/config/db";
+import User from "@/models/User";
 
 export async function POST(req) {
-
   try {
+    await connectDB();
 
     const { email, password } = await req.json();
 
-    // ✅ ADMIN LOGIN
-    const ADMIN_EMAIL = "admin@gmail.com";
-    const ADMIN_PASSWORD = "123456";
-
-    // ❌ INVALID LOGIN
-    if (
-      email !== ADMIN_EMAIL ||
-      password !== ADMIN_PASSWORD
-    ) {
-
-      return Response.json({
-        success: false,
-        message: "Invalid admin credentials"
-      });
-
+    if (!email || !password) {
+      return Response.json({ success: false, message: "Email and password are required." });
     }
 
-    // ✅ JWT TOKEN
+    const admin = await User.findOne({ email: email.toLowerCase().trim(), role: "admin" });
+
+    if (!admin) {
+      return Response.json({ success: false, message: "Invalid admin credentials" });
+    }
+
+    const passwordMatches = await bcrypt.compare(password, admin.password);
+
+    if (!passwordMatches) {
+      return Response.json({ success: false, message: "Invalid admin credentials" });
+    }
+
     const token = jwt.sign(
       {
-        userId: "admin_001",
-        name: "Admin",
-        email: ADMIN_EMAIL,
-        role: "admin"
+        id: admin._id,
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
       },
-
       process.env.JWT_SECRET,
-
-      {
-        expiresIn: "1d"
-      }
+      { expiresIn: "1d" }
     );
 
-    // ✅ SUCCESS
     return Response.json({
       success: true,
       message: "Admin login successful",
       token,
-
       admin: {
-        name: "Admin",
-        email: ADMIN_EMAIL,
-        role: "admin"
-      }
+        name: admin.name,
+        email: admin.email,
+        role: "admin",
+      },
     });
-
   } catch (error) {
-
     console.log(error);
-
-    return Response.json({
-      success: false,
-      message: error.message
-    });
-
+    return Response.json({ success: false, message: error.message });
   }
-
 }

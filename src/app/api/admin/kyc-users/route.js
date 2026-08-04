@@ -8,33 +8,33 @@ export async function GET(req) {
 
     verifyAdmin(req);
 
-    const users = await User.find().lean();
+    const users = await User.find({ role: "user" }).lean();
 
-    const customers = users.map((u) => ({
-      id: u._id,
-      name: u.name,
-      email: u.email,
-      phone: u.phone || "-",
+    const customers = users.map((u) => {
+      const kyc = u.kyc || {};
 
-      pan: u.kyc?.pan || "-",
-      aadhaar: u.kyc?.aadhaar || "-",
+      // Never send the encrypted Aadhaar blob to the browser
+      const { aadhaarEncrypted, ...safeKyc } = kyc;
 
-      kycStatus: u.kyc?.status || "pending",
+      return {
+        _id: u._id,
+        name: u.name,
+        email: u.email,
+        mobile: u.mobile || "-",
+        status: u.status,
+        kyc: safeKyc,
+        createdAt: u.createdAt,
+      };
+    });
 
-      // Credit Score from MongoDB
-      creditScore: u.creditScore || 0,
-
-      sessionId: u.kyc?.sessionId,
-    }));
-
-    return Response.json(customers);
+    return Response.json({ success: true, customers });
   } catch (error) {
     console.error("KYC USERS ERROR:", error);
 
     return Response.json(
       {
         success: false,
-        error: error.message,
+        message: error.message || "Failed to load customers.",
       },
       { status: 500 }
     );

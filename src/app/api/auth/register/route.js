@@ -8,7 +8,7 @@ export async function POST(req) {
 
   const { name, email, password } = await req.json();
 
-  //  check existing user
+  // check existing user
   const existingUser = await User.findOne({ email });
   if (existingUser) {
     return Response.json({
@@ -19,21 +19,23 @@ export async function POST(req) {
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
-  //  ADMIN LOGIC
+  // ADMIN LOGIC
   const isAdmin = email === "admin@gmail.com";
 
   const user = await User.create({
     name,
     email,
     password: hashedPassword,
-    role: isAdmin ? "admin" : "user"   //  NEW
+    role: isAdmin ? "admin" : "user"
   });
 
-  //  Create wallet automatically
-  await Wallet.create({
-    userId: user._id,
-    balance: 0
-  });
+  // Only create a wallet for regular users, never for admins
+  if (!isAdmin) {
+    await Wallet.create({
+      userId: user._id,
+      balance: 0
+    });
+  }
 
   return Response.json({
     success: true,
